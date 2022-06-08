@@ -1,10 +1,10 @@
-id: snowTest_demod
+id: snow_demod
 label: Snow demod
 category: 'SNOW'
 
 templates:
-  imports: import snowTest
-  make: snowTest.demod()
+  imports: import snow
+  make: snow.demod(${enable_log}, ${threshold}, ${fft_size}, ${subcarriers})
 
 #  Make one 'parameters' list entry for every parameter you want settable from the GUI.
 #     Keys include:

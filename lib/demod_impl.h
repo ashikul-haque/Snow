@@ -27,6 +27,11 @@ private:
       long long sample_count;
       //std::vector<long> multiply_factor;
       long multiply_factor[64];
+      int flags[3];
+      int counts[3];
+      int count0[3];
+      int count1[3];
+
       std::ofstream log_file;
       std::ofstream data_file[64];
 
