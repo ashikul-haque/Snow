@@ -139,7 +139,15 @@ int demod_impl::work(int noutput_items,
                     // std::endl;
 
                     if (mag >= d_threshold) {
-                         if(flags[j]==0){
+                        if(flags[j]==-2){
+                            counts[j]++;
+                            if(counts[j]==320){
+                                flags[j]=0;
+                                counts[j] = 0;
+                            }
+                        }
+
+                        if(flags[j]==0){
                             counts[j]++;
                             if(counts[j]>=10){
                                 flags[j]=-1;
@@ -162,8 +170,8 @@ int demod_impl::work(int noutput_items,
                                 count1[j] = 0;
                                 counts[j]++;
                                 if (counts[j] == 4) {
-                                    data_file[j] << "\n\nend";
-                                    flags[j] = -2;
+                                    data_file[j] << "\nend\n\n";
+                                    flags[j] = -3;
                                     counts[j] = 0;
                                     count0[j] = 0;
                                     count1[j] = 0;
@@ -173,19 +181,27 @@ int demod_impl::work(int noutput_items,
                         
                     } 
                     else {
-                        if(flags[j]==-1){
+                        if(flags[j]==-2){
                             counts[j]++;
+                            if(counts[j]==320){
+                                flags[j]=0;
+                                counts[j] = 0;
+                            }
                         }
 
-                        if(flags[j]==-1 && counts[j]==410){
-                            data_file[j] << "\n\n";
-                            counts[j]=0;
-                            flags[j]=1;
+                        if(flags[j]==-1){
+                            counts[j]++;
+                            if(counts[j]==410){
+                                //data_file[j] << "\n\n";
+                                counts[j] = 0;
+                                flags[j] = 1;
+                            }
                         }
+
                         //data_file[j] << "0";
                         if(flags[j]==1){
                             count0[j]++;
-                            if((count0[j]+count1[j])==20){
+                            if((count0[j]+count1[j])==19){
                                 if (count0[j] < count1[j]) {
                                     data_file[j] << "1";
                                 } else {
@@ -195,7 +211,8 @@ int demod_impl::work(int noutput_items,
                                 count1[j] = 0;
                                 counts[j]++;
                                 if (counts[j] == 4) {
-                                    flags[j] = 0;
+                                    data_file[j] << "\n\n";
+                                    flags[j] = -3;
                                     counts[j] = 0;
                                     count0[j] = 0;
                                     count1[j] = 0;
