@@ -72,7 +72,7 @@ demod_impl::demod_impl(bool enable_log,
             count1[i] = 0;
             multiply_factor[i] = 0;
             std::string temp = home;
-            temp.append("/Documents/snow/snow-data/subcarrier_" + boost::to_string(d_subcarriers[i]) + ".txt");
+            temp.append("/Documents/snow/snow-data/subcarrier_" + std::to_string(d_subcarriers[i]) + ".txt");
             data_file[i].open(temp.c_str());
         }
 

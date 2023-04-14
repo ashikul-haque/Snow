@@ -6,40 +6,28 @@
 #
 # GNU Radio Python Flow Graph
 # Title: Top Block
-# GNU Radio version: 3.9.5.0
+# GNU Radio version: 3.10.6.0
 
-from distutils.version import StrictVersion
-
-if __name__ == '__main__':
-    import ctypes
-    import sys
-    if sys.platform.startswith('linux'):
-        try:
-            x11 = ctypes.cdll.LoadLibrary('libX11.so')
-            x11.XInitThreads()
-        except:
-            print("Warning: failed to XInitThreads()")
-
+from packaging.version import Version as StrictVersion
 from PyQt5 import Qt
 from gnuradio import qtgui
-from gnuradio.filter import firdes
-import sip
 from gnuradio import blocks
 from gnuradio import fft
 from gnuradio.fft import window
 from gnuradio import gr
+from gnuradio.filter import firdes
 import sys
 import signal
+from PyQt5 import Qt
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
 from gnuradio import uhd
 import time
-import snowTest
+import sip
+import snow
 
 
-
-from gnuradio import qtgui
 
 class top_block(gr.top_block, Qt.QWidget):
 
@@ -50,8 +38,8 @@ class top_block(gr.top_block, Qt.QWidget):
         qtgui.util.check_set_qss()
         try:
             self.setWindowIcon(Qt.QIcon.fromTheme('gnuradio-grc'))
-        except:
-            pass
+        except BaseException as exc:
+            print(f"Qt GUI: Could not set Icon: {str(exc)}", file=sys.stderr)
         self.top_scroll_layout = Qt.QVBoxLayout()
         self.setLayout(self.top_scroll_layout)
         self.top_scroll = Qt.QScrollArea()
@@ -71,20 +59,21 @@ class top_block(gr.top_block, Qt.QWidget):
                 self.restoreGeometry(self.settings.value("geometry").toByteArray())
             else:
                 self.restoreGeometry(self.settings.value("geometry"))
-        except:
-            pass
+        except BaseException as exc:
+            print(f"Qt GUI: Could not restore geometry: {str(exc)}", file=sys.stderr)
 
         ##################################################
         # Variables
         ##################################################
-        self.tx_gain = tx_gain = 75
+        self.tx_gain = tx_gain = -110
         self.samp_rate = samp_rate = 4e6
-        self.freq = freq = 551e6
+        self.freq = freq = 450e6
         self.fft_size = fft_size = 64
 
         ##################################################
         # Blocks
         ##################################################
+
         self.uhd_usrp_source_0 = uhd.usrp_source(
             ",".join(("", "")),
             uhd.stream_args(
@@ -94,13 +83,13 @@ class top_block(gr.top_block, Qt.QWidget):
             ),
         )
         self.uhd_usrp_source_0.set_samp_rate(samp_rate)
-        self.uhd_usrp_source_0.set_time_unknown_pps(uhd.time_spec(0))
+        # No synchronization enforced.
 
         self.uhd_usrp_source_0.set_center_freq(freq, 0)
         self.uhd_usrp_source_0.set_antenna('TX/RX', 0)
-        self.uhd_usrp_source_0.set_bandwidth(12e6, 0)
+        self.uhd_usrp_source_0.set_bandwidth(6e6, 0)
         self.uhd_usrp_source_0.set_gain(tx_gain, 0)
-        self.snowTest_demod_0 = snowTest.demod()
+        self.snow_demod_0 = snow.demod(False, 3, fft_size, [16, 32, 48])
         self.qtgui_time_sink_x_0_0 = qtgui.time_sink_f(
             fft_size, #size
             fft_size, #samp_rate
@@ -158,9 +147,9 @@ class top_block(gr.top_block, Qt.QWidget):
         # Connections
         ##################################################
         self.connect((self.blocks_stream_to_vector_0, 0), (self.fft_vxx_0, 0))
-        self.connect((self.blocks_vector_to_stream_0, 0), (self.snowTest_demod_0, 0))
+        self.connect((self.blocks_vector_to_stream_0, 0), (self.snow_demod_0, 0))
         self.connect((self.fft_vxx_0, 0), (self.blocks_vector_to_stream_0, 0))
-        self.connect((self.snowTest_demod_0, 0), (self.qtgui_time_sink_x_0_0, 0))
+        self.connect((self.snow_demod_0, 0), (self.qtgui_time_sink_x_0_0, 0))
         self.connect((self.uhd_usrp_source_0, 0), (self.blocks_stream_to_vector_0, 0))
 
 
